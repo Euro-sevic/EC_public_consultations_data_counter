@@ -12,8 +12,8 @@ dist/
 *.egg-info/
 
 # Output files
-*.csv
-*.json
+# *.csv
+# *.json
 *.zip
 
 # IDE
