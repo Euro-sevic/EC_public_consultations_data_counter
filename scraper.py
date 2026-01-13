@@ -104,34 +104,35 @@ class EUConsultationScraper:
             await page.goto(self.SEARCH_URL, wait_until="domcontentloaded", timeout=60000)
             await self.wait_for_page_load(page)
 
-            # Wait for results to load
-            await page.wait_for_selector('.ecl-card', timeout=30000)
+            # Wait for results to load - look for initiative links
+            await page.wait_for_selector('a[href*="/initiatives/"]', timeout=30000)
 
             # Handle pagination if needed
             page_num = 1
             while True:
                 logger.info(f"Extracting URLs from page {page_num}")
 
-                # Extract links from current page
-                # The cards contain links to initiative pages
-                cards = await page.query_selector_all('.ecl-card')
-                logger.info(f"Found {len(cards)} cards on page {page_num}")
+                # Extract all links to initiative pages directly
+                links = await page.query_selector_all('a[href*="/initiatives/"]')
+                logger.info(f"Found {len(links)} initiative links on page {page_num}")
 
-                for card in cards:
-                    link_element = await card.query_selector('a[href*="/initiatives/"]')
-                    if link_element:
-                        href = await link_element.get_attribute('href')
-                        if href:
-                            # Convert relative to absolute URL
-                            if href.startswith('/'):
-                                full_url = f"https://ec.europa.eu{href}"
-                            else:
-                                full_url = href
+                for link_element in links:
+                    href = await link_element.get_attribute('href')
+                    if href and '/initiatives/' in href:
+                        # Convert relative to absolute URL
+                        if href.startswith('/'):
+                            full_url = f"https://ec.europa.eu{href}"
+                        else:
+                            full_url = href
 
-                            # Remove the _en suffix and any query params for consistency
-                            full_url = full_url.split('?')[0]
-                            if full_url not in initiative_urls:
-                                initiative_urls.append(full_url)
+                        # Remove the _en suffix and any query params for consistency
+                        full_url = full_url.split('?')[0]
+                        if full_url.endswith('_en'):
+                            full_url = full_url[:-3]
+
+                        # Only add unique URLs
+                        if full_url not in initiative_urls:
+                            initiative_urls.append(full_url)
 
                 # Check if there's a next page button
                 next_button = await page.query_selector('button[aria-label*="next" i], a[aria-label*="next" i], .ecl-pagination__link--next')
