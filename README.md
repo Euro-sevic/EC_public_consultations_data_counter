@@ -1,5 +1,7 @@
 # EU Public Consultations Data (2016-2026)
 
+[**📊 View Interactive Analysis & Visualization**](https://euro-sevic.github.io/EC_public_consultations_data_counter/)
+
 This repository contains datasets of public consultations from the European Commission, scraped from the official [Have Your Say](https://ec.europa.eu/info/law/better-regulation/have-your-say) portal.
 
 ## Datasets
